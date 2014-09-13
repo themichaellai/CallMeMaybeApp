@@ -101,7 +101,8 @@ class GetAsync extends AsyncTask<Object, Void, JSONObject> {
     }
 
     protected JSONObject fetch() {
-        String host = "http://158.130.169.168:3000/";
+        //String host = "http://158.130.169.168:3000/";
+        String host = "http://young-gorge-7543.herokuapp.com/";
         Uri.Builder builder = Uri.parse(host).buildUpon();
         builder.scheme("http").appendPath("number")
                 .appendPath(activity.getSearchQuery());
