@@ -1,16 +1,16 @@
 package me.maybecall.callmemaybe;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -21,32 +21,28 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
 
 
 public class MainActivity extends Activity {
-    private List<String> items;
+    public JSONObject items;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        items = new ArrayList<String>();
+        setTitle("Enter phone number");
+
         final Button searchButton = (Button)findViewById(R.id.search_button);
         final EditText searchField = (EditText)findViewById(R.id.search_term);
-        final ListView searchResults = (ListView)findViewById(R.id.search_results);
-        final ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-                this, android.R.layout.simple_list_item_1, items);
-        searchResults.setAdapter(adapter);
+        //final ListView searchResults = (ListView)findViewById(R.id.search_results);
+        //final ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+                //this, android.R.layout.simple_list_item_1, items);
+        //searchResults.setAdapter(adapter);
         searchButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                String text = searchField.getText().toString();
-                adapter.add(text);
-                Log.d("MainActivity", text);
+                new GetAsync().execute(MainActivity.this);
             }
         });
-        new GetAsync().execute(searchResults);
         //button.setOnClickListener(new View.OnClickListener() {
         //    public void onClick(View v) {
         //        String url = "tel:" + sanitizeUri("18774869273,,,4");
@@ -76,6 +72,11 @@ public class MainActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
+    public String getSearchQuery() {
+        EditText searchField = (EditText)findViewById(R.id.search_term);
+        return searchField.getText().toString();
+    }
+
     private static String sanitizeUri(String uri) {
         return uri.trim().replace(" ", "%20").replace("&", "%26")
                 .replace(",", "%2c").replace("(", "%28").replace(")", "%29")
@@ -90,36 +91,46 @@ public class MainActivity extends Activity {
     }
 }
 
-class GetAsync extends AsyncTask<ListView, Void, JSONObject> {
-    ListView lv;
+class GetAsync extends AsyncTask<Object, Void, JSONObject> {
+    MainActivity activity;
 
     @Override
-    protected JSONObject doInBackground(ListView... params) {
-        this.lv = params[0];
+    protected JSONObject doInBackground(Object... params) {
+        this.activity = (MainActivity)params[0];
         return fetch();
     }
 
     protected JSONObject fetch() {
-        String url = "http://www.reddit.com/.json";
+        String host = "http://158.130.169.168:3000/";
+        Uri.Builder builder = Uri.parse(host).buildUpon();
+        builder.scheme("http").appendPath("number")
+                .appendPath(activity.getSearchQuery());
+        String url = builder.build().toString();
+        Log.d("AsyncFetch", String.format("Getting %s", url));
+
         BufferedReader inStream = null;
         try {
             HttpClient httpClient = new DefaultHttpClient();
             HttpGet httpRequest = new HttpGet(url);
             HttpResponse response = httpClient.execute(httpRequest);
-            inStream = new BufferedReader(
-                    new InputStreamReader(
-                            response.getEntity().getContent()));
+            if (response.getStatusLine().getStatusCode() == 404) {
+                return null;
+            } else {
+                inStream = new BufferedReader(
+                        new InputStreamReader(
+                                response.getEntity().getContent()));
 
-            StringBuffer buffer = new StringBuffer("");
-            String line = "";
-            String NL = System.getProperty("line.separator");
-            while ((line = inStream.readLine()) != null) {
-                buffer.append(line + NL);
+                StringBuffer buffer = new StringBuffer("");
+                String line = "";
+                String NL = System.getProperty("line.separator");
+                while ((line = inStream.readLine()) != null) {
+                    buffer.append(line + NL);
+                }
+                inStream.close();
+                String resString = buffer.toString();
+                JSONObject jsonObject = new JSONObject(resString);
+                return jsonObject;
             }
-            inStream.close();
-            String resString = buffer.toString();
-            JSONObject jsonObject = new JSONObject(resString);
-            return jsonObject;
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -136,5 +147,13 @@ class GetAsync extends AsyncTask<ListView, Void, JSONObject> {
 
     @Override
     protected void onPostExecute(JSONObject object) {
+        if (object != null) {
+            Log.d("AsyncFetch", String.format("post execute %s", object.toString()));
+            Intent intent = new Intent(activity, OptionActivity.class);
+            intent.putExtra("companyJSON", object.toString());
+            activity.startActivity(intent);
+        } else {
+            Log.d("AsyncFetch", "post execute, obj is null");
+        }
     }
 }
