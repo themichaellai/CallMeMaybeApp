@@ -11,7 +11,6 @@ import android.widget.Button;
 
 
 public class MainActivity extends Activity {
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -20,7 +19,7 @@ public class MainActivity extends Activity {
         final Button button = (Button)findViewById(R.id.button);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                String url = "tel:<phonenum>";
+                String url = "tel:" + sanitizeUri("");
                 Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse(url));
                 startActivity(intent);
             }
@@ -45,5 +44,18 @@ public class MainActivity extends Activity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private static String sanitizeUri(String uri) {
+        return uri.trim().replace(" ", "%20").replace("&", "%26")
+                .replace(",", "%2c").replace("(", "%28").replace(")", "%29")
+                .replace("!", "%21").replace("=", "%3D").replace("<", "%3C")
+                .replace(">", "%3E").replace("#", "%23").replace("$", "%24")
+                .replace("'", "%27").replace("*", "%2A").replace("-", "%2D")
+                .replace(".", "%2E").replace("/", "%2F").replace(":", "%3A")
+                .replace(";", "%3B").replace("?", "%3F").replace("@", "%40")
+                .replace("[", "%5B").replace("\\", "%5C").replace("]", "%5D")
+                .replace("_", "%5F").replace("`", "%60").replace("{", "%7B")
+                .replace("|", "%7C").replace("}", "%7D");
     }
 }
