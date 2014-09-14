@@ -2,10 +2,12 @@ package me.maybecall.callmemaybe;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -43,9 +45,17 @@ public class CallActivity extends Activity {
         Log.d("OptionActivity", "key descs: " + pathDescriptions.toString());
         try {
             final JSONObject company = new JSONObject(intent.getStringExtra("companyJSON"));
-            String number = company.getString("number");
+            final String number = company.getString("number");
             phoneNumberText.setText(number);
             selectedOptionsText.setText(prettyPath(path, pathDescriptions));
+            callButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    String url = "tel:" + sanitizeUri(number) + generateToneString(path);
+                    Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse(url));
+                    startActivity(intent);
+                }
+            });
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -83,5 +93,31 @@ public class CallActivity extends Activity {
         } else {
             return "";
         }
+    }
+
+    private static String generateToneString(List<String> path) {
+        if (path.size() > 0) {
+            StringBuilder sb = new StringBuilder();
+            for (String key : path) {
+                sb.append(",,");
+                sb.append(key);
+            }
+            return sb.toString();
+        } else {
+            return "";
+        }
+    }
+
+    private static String sanitizeUri(String uri) {
+        return uri.trim().replace(" ", "%20").replace("&", "%26")
+                .replace(",", "%2c").replace("(", "%28").replace(")", "%29")
+                .replace("!", "%21").replace("=", "%3D").replace("<", "%3C")
+                .replace(">", "%3E").replace("#", "%23").replace("$", "%24")
+                .replace("'", "%27").replace("*", "%2A").replace("-", "%2D")
+                .replace(".", "%2E").replace("/", "%2F").replace(":", "%3A")
+                .replace(";", "%3B").replace("?", "%3F").replace("@", "%40")
+                .replace("[", "%5B").replace("\\", "%5C").replace("]", "%5D")
+                .replace("_", "%5F").replace("`", "%60").replace("{", "%7B")
+                .replace("|", "%7C").replace("}", "%7D");
     }
 }
