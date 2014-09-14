@@ -26,6 +26,11 @@
             android:label="@string/title_activity_call"
             android:theme="@style/CustomActionBarTheme" >
         </activity>
+        <activity
+            android:name=".CompanyListActivity"
+            android:theme="@style/CustomActionBarTheme"
+            android:label="@string/title_activity_company_list" >
+        </activity>
     </application>
 
     <uses-permission android:name="android.permission.CALL_PHONE" />

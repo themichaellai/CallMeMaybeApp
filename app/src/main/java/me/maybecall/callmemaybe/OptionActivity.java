@@ -45,10 +45,10 @@ public class OptionActivity extends Activity {
         try {
             final JSONObject company = new JSONObject(intent.getStringExtra("companyJSON"));
             JSONObject treeObject = company.getJSONObject("treeString");
-            String number = company.getString("number");
+            String name = company.getString("name");
             final JSONObject currentLevel = traverseTree(treeObject, path);
             setTitle(String.format("%s %s", company.getString("name"), prettyPath(path)));
-            pathTextView.setText(String.format("%s %s", number, prettyPath(path)));
+            pathTextView.setText(String.format("%s %s", name, prettyPath(path)));
             final List<String> keys = extractKeys(currentLevel);
             List<String> listableOptions = extractListToDisplay(currentLevel, keys);
             ArrayAdapter<String> adapter = new ArrayAdapter<String>(

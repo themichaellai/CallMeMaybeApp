@@ -43,5 +43,16 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="34dp"
         android:textSize="40dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="(demo?)"
+        android:id="@+id/demo_button"
+        android:layout_marginTop="52dp"
+        android:layout_below="@+id/search_button"
+        android:layout_centerHorizontal="true"
+        android:textSize="11dp" />
 </RelativeLayout>
 

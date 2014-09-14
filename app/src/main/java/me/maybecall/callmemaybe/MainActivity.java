@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -36,6 +37,7 @@ public class MainActivity extends Activity {
 
         final Button searchButton = (Button)findViewById(R.id.search_button);
         final EditText searchField = (EditText)findViewById(R.id.search_term);
+        TextView demoButton = (TextView)findViewById(R.id.demo_button);
         //final ListView searchResults = (ListView)findViewById(R.id.search_results);
         //final ArrayAdapter<String> adapter = new ArrayAdapter<String>(
                 //this, android.R.layout.simple_list_item_1, items);
@@ -43,6 +45,13 @@ public class MainActivity extends Activity {
         searchButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 new GetAsync().execute(MainActivity.this);
+            }
+        });
+
+        demoButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, CompanyListActivity.class);
+                startActivity(intent);
             }
         });
         //button.setOnClickListener(new View.OnClickListener() {

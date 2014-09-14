@@ -46,7 +46,8 @@ public class CallActivity extends Activity {
         try {
             final JSONObject company = new JSONObject(intent.getStringExtra("companyJSON"));
             final String number = company.getString("number");
-            phoneNumberText.setText(number);
+            final String name = company.getString("name");
+            phoneNumberText.setText(String.format("%s (%s)", name, number));
             selectedOptionsText.setText(prettyPath(path, pathDescriptions));
             callButton.setOnClickListener(new View.OnClickListener() {
                 @Override
