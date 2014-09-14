@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -35,7 +36,19 @@ public class CompanyListActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_company_list);
-        new ListQueryAsync().execute(this);
+        Intent intent = getIntent();
+        TextView title = (TextView)findViewById(R.id.companies_list_title);
+        if (intent.getExtras() != null && intent.getExtras().containsKey("companiesJSON")) {
+            try {
+                Log.d("CompanyListActivity", "had cached companies");
+                setCompanies(new JSONArray(intent.getStringExtra("companiesJSON")));
+                title.setText("search");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        } else {
+            new ListQueryAsync().execute(this);
+        }
         ListView companyListView = (ListView)findViewById(R.id.company_list);
         companyListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -69,14 +82,14 @@ public class CompanyListActivity extends Activity {
     }
 
     public void setCompanies(JSONArray companies) {
-        companyList.addAll(getCompanies(companies));
+        companyList.addAll(extractCompanies(companies));
         ArrayAdapter<Company> adapter = new ArrayAdapter<Company>(
                 this, android.R.layout.simple_list_item_1, companyList);
         ListView companyList = (ListView)findViewById(R.id.company_list);
         companyList.setAdapter(adapter);
     }
 
-    private static List<Company> getCompanies(JSONArray companies) {
+    private static List<Company> extractCompanies(JSONArray companies) {
         List<Company> res = new ArrayList<Company>();
         for (int i = 0; i < companies.length(); i++) {
             try {
@@ -146,10 +159,10 @@ class ListQueryAsync extends AsyncTask<Object, Void, JSONArray> {
     @Override
     protected void onPostExecute(JSONArray arr) {
         if (arr != null) {
-            Log.d("ListQueryFetch", String.format("post execute %s", arr.toString()));
+            Log.d("CompanyListActivity", String.format("post execute %s", arr.toString()));
             activity.setCompanies(arr);
         } else {
-            Log.d("ListQueryFetch", "post execute, obj is null");
+            Log.d("CompanyListActivity", "post execute, obj is null");
         }
     }
 }

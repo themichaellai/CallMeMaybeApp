@@ -18,7 +18,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONObject;
+import org.json.JSONArray;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -26,7 +26,7 @@ import java.io.InputStreamReader;
 
 
 public class MainActivity extends Activity {
-    public JSONObject items;
+    public JSONArray items;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -102,21 +102,21 @@ public class MainActivity extends Activity {
     }
 }
 
-class GetAsync extends AsyncTask<Object, Void, JSONObject> {
+class GetAsync extends AsyncTask<Object, Void, JSONArray> {
     MainActivity activity;
 
     @Override
-    protected JSONObject doInBackground(Object... params) {
+    protected JSONArray doInBackground(Object... params) {
         this.activity = (MainActivity)params[0];
         return fetch();
     }
 
-    protected JSONObject fetch() {
-        //String host = "http://158.130.169.168:3000/";
-        String host = "http://young-gorge-7543.herokuapp.com/";
+    protected JSONArray fetch() {
+        String host = "http://158.130.169.168:3000/";
+        //String host = "http://young-gorge-7543.herokuapp.com/";
         Uri.Builder builder = Uri.parse(host).buildUpon();
         builder.scheme("http").appendPath("number")
-                .appendPath(activity.getSearchQuery());
+                .appendQueryParameter("searchQuery", activity.getSearchQuery());
         String url = builder.build().toString();
         Log.d("AsyncFetch", String.format("Getting %s", url));
 
@@ -140,8 +140,7 @@ class GetAsync extends AsyncTask<Object, Void, JSONObject> {
                 }
                 inStream.close();
                 String resString = buffer.toString();
-                JSONObject jsonObject = new JSONObject(resString);
-                return jsonObject;
+                return new JSONArray(resString);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -158,11 +157,11 @@ class GetAsync extends AsyncTask<Object, Void, JSONObject> {
     }
 
     @Override
-    protected void onPostExecute(JSONObject object) {
-        if (object != null) {
-            Log.d("AsyncFetch", String.format("post execute %s", object.toString()));
-            Intent intent = new Intent(activity, OptionActivity.class);
-            intent.putExtra("companyJSON", object.toString());
+    protected void onPostExecute(JSONArray arr) {
+        if (arr != null) {
+            Log.d("AsyncFetch", String.format("post execute %s", arr.toString()));
+            Intent intent = new Intent(activity, CompanyListActivity.class);
+            intent.putExtra("companiesJSON", arr.toString());
             activity.startActivity(intent);
         } else {
             Log.d("AsyncFetch", "post execute, obj is null");
