@@ -36,6 +36,12 @@ public class OptionActivity extends Activity {
         } else {
             path = new ArrayList<String>();
         }
+        final ArrayList<String> pathDescriptions;
+        if (intent.getExtras().containsKey("selectedKeyDescriptions")) {
+            pathDescriptions = intent.getStringArrayListExtra("selectedKeyDescriptions");
+        } else {
+            pathDescriptions = new ArrayList<String>();
+        }
         try {
             final JSONObject company = new JSONObject(intent.getStringExtra("companyJSON"));
             JSONObject treeObject = company.getJSONObject("treeString");
@@ -48,17 +54,28 @@ public class OptionActivity extends Activity {
             ArrayAdapter<String> adapter = new ArrayAdapter<String>(
                     this, android.R.layout.simple_list_item_1, listableOptions);
             optionsListView.setAdapter(adapter);
+            Log.d("OptionActivity", "keys: " + path.toString());
+            Log.d("OptionActivity", "key descs: " + pathDescriptions.toString());
             optionsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                     String key = keys.get(i);
                     Option opt = extractOption(currentLevel, key);
+                    ArrayList<String> newPath = (ArrayList<String>)path.clone();
+                    ArrayList<String> newPathDescs = (ArrayList<String>)pathDescriptions.clone();
+                    newPath.add(key);
+                    newPathDescs.add(opt.getDescription());
                     if (opt.getChildren() != null && opt.getChildren().length() > 0) {
-                        ArrayList<String> newPath = (ArrayList<String>)path.clone();
-                        newPath.add(key);
                         Intent newIntent = new Intent(OptionActivity.this, OptionActivity.class);
                         newIntent.putExtra("companyJSON", company.toString());
                         newIntent.putStringArrayListExtra("selectedKeys", newPath);
+                        newIntent.putStringArrayListExtra("selectedKeyDescriptions", newPathDescs);
+                        startActivity(newIntent);
+                    } else {
+                        Intent newIntent = new Intent(OptionActivity.this, CallActivity.class);
+                        newIntent.putExtra("companyJSON", company.toString());
+                        newIntent.putStringArrayListExtra("selectedKeys", newPath);
+                        newIntent.putStringArrayListExtra("selectedKeyDescriptions", newPathDescs);
                         startActivity(newIntent);
                     }
                 }

@@ -15,9 +15,9 @@
         android:text="Search"
         android:id="@+id/search_button"
         android:layout_marginTop="98dp"
-        android:layout_below="@+id/textView"
-        android:layout_alignStart="@+id/textView"
-        android:layout_alignEnd="@+id/textView"
+        android:layout_below="@+id/phone_number_text"
+        android:layout_alignStart="@+id/phone_number_text"
+        android:layout_alignEnd="@+id/phone_number_text"
         android:background="@drawable/rectangle_border" />
 
     <EditText
@@ -38,7 +38,7 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="call me maybe"
-        android:id="@+id/textView"
+        android:id="@+id/phone_number_text"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="34dp"
