@@ -18,7 +18,8 @@
         </activity>
         <activity
             android:name=".OptionActivity"
-            android:label="@string/title_activity_option" >
+            android:label="@string/title_activity_option"
+            android:theme="@style/CustomActionBarTheme" >
         </activity>
     </application>
 

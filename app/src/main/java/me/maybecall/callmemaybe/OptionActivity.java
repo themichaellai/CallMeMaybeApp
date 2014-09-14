@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -27,6 +28,7 @@ public class OptionActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_option);
         ListView optionsListView = (ListView)findViewById(R.id.options_list);
+        TextView pathTextView = (TextView)findViewById(R.id.path_text);
         Intent intent = getIntent();
         final ArrayList<String> path;
         if (intent.getExtras().containsKey("selectedKeys")) {
@@ -37,8 +39,10 @@ public class OptionActivity extends Activity {
         try {
             final JSONObject company = new JSONObject(intent.getStringExtra("companyJSON"));
             JSONObject treeObject = company.getJSONObject("treeString");
+            String number = company.getString("number");
             final JSONObject currentLevel = traverseTree(treeObject, path);
             setTitle(String.format("%s %s", company.getString("name"), prettyPath(path)));
+            pathTextView.setText(String.format("%s %s", number, prettyPath(path)));
             final List<String> keys = extractKeys(currentLevel);
             List<String> listableOptions = extractListToDisplay(currentLevel, keys);
             ArrayAdapter<String> adapter = new ArrayAdapter<String>(

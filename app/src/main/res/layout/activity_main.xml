@@ -16,7 +16,9 @@
         android:id="@+id/search_button"
         android:layout_marginTop="98dp"
         android:layout_below="@+id/textView"
-        android:layout_centerHorizontal="true" />
+        android:layout_alignStart="@+id/textView"
+        android:layout_alignEnd="@+id/textView"
+        android:background="@drawable/rectangle_border" />
 
     <EditText
         android:layout_width="wrap_content"
@@ -41,5 +43,5 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="34dp"
         android:textSize="40dp" />
-
 </RelativeLayout>
+

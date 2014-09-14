@@ -12,5 +12,17 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/options_list"
+        android:layout_toStartOf="@+id/path_text"
+        android:layout_below="@+id/path_text"
+        android:layout_alignParentEnd="true"
         android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="phone number"
+        android:id="@+id/path_text"
+        android:layout_centerHorizontal="true"
+        android:textSize="30dp" />
 </RelativeLayout>
