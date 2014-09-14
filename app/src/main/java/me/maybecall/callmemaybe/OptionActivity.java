@@ -11,7 +11,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -29,11 +28,19 @@ public class OptionActivity extends Activity {
         setContentView(R.layout.activity_option);
         ListView optionsListView = (ListView)findViewById(R.id.options_list);
         Intent intent = getIntent();
+        final ArrayList<String> path;
+        if (intent.getExtras().containsKey("selectedKeys")) {
+            path = intent.getStringArrayListExtra("selectedKeys");
+        } else {
+            path = new ArrayList<String>();
+        }
         try {
             final JSONObject company = new JSONObject(intent.getStringExtra("companyJSON"));
-            setTitle(company.getString("name"));
-            final List<String> keys = extractKeys(company);
-            List<String> listableOptions = extractListToDisplay(company, keys);
+            JSONObject treeObject = company.getJSONObject("treeString");
+            final JSONObject currentLevel = traverseTree(treeObject, path);
+            setTitle(String.format("%s %s", company.getString("name"), prettyPath(path)));
+            final List<String> keys = extractKeys(currentLevel);
+            List<String> listableOptions = extractListToDisplay(currentLevel, keys);
             ArrayAdapter<String> adapter = new ArrayAdapter<String>(
                     this, android.R.layout.simple_list_item_1, listableOptions);
             optionsListView.setAdapter(adapter);
@@ -41,8 +48,15 @@ public class OptionActivity extends Activity {
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                     String key = keys.get(i);
-                    Option opt = extractOption(company, key);
-                    Log.d("OptionActivity", String.format("tapped %s", opt.getDescription()));
+                    Option opt = extractOption(currentLevel, key);
+                    if (opt.getChildren() != null && opt.getChildren().length() > 0) {
+                        ArrayList<String> newPath = (ArrayList<String>)path.clone();
+                        newPath.add(key);
+                        Intent newIntent = new Intent(OptionActivity.this, OptionActivity.class);
+                        newIntent.putExtra("companyJSON", company.toString());
+                        newIntent.putStringArrayListExtra("selectedKeys", newPath);
+                        startActivity(newIntent);
+                    }
                 }
             });
         } catch (JSONException e) {
@@ -70,34 +84,39 @@ public class OptionActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    private List<String> extractKeys(JSONObject companyJSON) {
+    private List<String> extractKeys(JSONObject tree) {
+        List<String> keys = iteratorToList(tree.keys());
+        Collections.sort(keys);
+        return keys;
+    }
+
+    private Option extractOption(JSONObject tree, String key) {
         try {
-            JSONObject children = companyJSON.getJSONObject("treeString");
-            List<String> keys = iteratorToList(children.keys());
-            Collections.sort(keys);
-            return keys;
+            return new Option(tree.getJSONArray(key));
         } catch (JSONException e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    private Option extractOption(JSONObject company, String key) {
+    private JSONObject traverseTree(JSONObject tree, List<String> path) {
         try {
-            JSONObject children = company.getJSONObject("treeString");
-            return new Option(children.getJSONArray(key));
+            JSONObject currObject = tree;
+            for (String key : path) {
+                Option option = new Option(currObject.getJSONArray(key));
+                currObject = option.getChildren();
+            }
+            return currObject;
         } catch (JSONException e) {
             e.printStackTrace();
         }
         return null;
     }
-
-    private List<String> extractListToDisplay(JSONObject companyJSON, List<String> keys) {
+    private List<String> extractListToDisplay(JSONObject tree, List<String> keys) {
         List<String> res = new ArrayList<String>();
         try {
-            JSONObject children = companyJSON.getJSONObject("treeString");
             for (String key : keys) {
-                Option option = new Option(children.getJSONArray(key));
+                Option option = new Option(tree.getJSONArray(key));
                 res.add(option.getDescription());
             }
         } catch (JSONException e) {
@@ -112,6 +131,19 @@ public class OptionActivity extends Activity {
             res.add(iterator.next());
         }
         return res;
+    }
+
+    private static String prettyPath(List<String> path) {
+        if (path.size() > 0) {
+            StringBuilder sb = new StringBuilder(path.get(0));
+            for (int i = 1; i < path.size(); i++) {
+                sb.append(" > ");
+                sb.append(path.get(i));
+            }
+            return String.format("(%s)", sb.toString());
+        } else {
+            return "";
+        }
     }
 }
 
