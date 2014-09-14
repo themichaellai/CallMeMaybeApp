@@ -1,5 +1,7 @@
 package me.maybecall.callmemaybe;
 
+import android.telephony.PhoneNumberUtils;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -32,6 +34,6 @@ public class Company {
 
     @Override
     public String toString() {
-        return String.format("%s (%s)", name, number);
+        return String.format("%s (%s)", name, PhoneNumberUtils.formatNumber(number));
     }
 }

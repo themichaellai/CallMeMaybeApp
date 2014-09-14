@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.telephony.PhoneNumberUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -47,7 +48,8 @@ public class CallActivity extends Activity {
             final JSONObject company = new JSONObject(intent.getStringExtra("companyJSON"));
             final String number = company.getString("number");
             final String name = company.getString("name");
-            phoneNumberText.setText(String.format("%s (%s)", name, number));
+            phoneNumberText.setText(
+                    String.format("%s (%s)", name, PhoneNumberUtils.formatNumber(number)));
             selectedOptionsText.setText(prettyPath(path, pathDescriptions));
             callButton.setOnClickListener(new View.OnClickListener() {
                 @Override
